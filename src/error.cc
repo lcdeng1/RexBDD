@@ -1,4 +1,4 @@
-// #include "defines.h"
+#include "defines.h"
 #include "error.h"
 
 REXBDD::error::error(REXBDD::error::code c, const char* fn, unsigned ln)
