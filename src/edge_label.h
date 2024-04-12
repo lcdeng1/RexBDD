@@ -94,25 +94,25 @@ class REXBDD::EdgeLabel {
         //******************************************
         //  Getters for the type
         //******************************************
-        inline bool isLabelVoid() const {
+        inline bool isValueVoid() const {
             return (labelType == ValueType::VOID);
         }
-        inline bool isLabelRule() const {
+        inline bool isValueRule() const {
             return (labelType == ValueType::RULE);
         }
-        inline bool isLabelInt() const {
+        inline bool isValueInt() const {
             return (labelType == ValueType::INT);
         }
-        inline bool isLabelLong() const {
+        inline bool isValueLong() const {
             return (labelType == ValueType::LONG);
         }
-        inline bool isLabelFloat() const {
+        inline bool isValueFloat() const {
             return (labelType == ValueType::FLOAT);
         }
-        inline bool isLabelDouble() const {
+        inline bool isValueDouble() const {
             return (labelType == ValueType::DOUBLE);
         }
-        inline bool hasLabelType(ValueType t) const {
+        inline bool hasValueType(ValueType t) const {
             return (labelType == t);
         }
         inline bool isFlagComp() const {
@@ -142,24 +142,24 @@ class REXBDD::EdgeLabel {
         //******************************************
         //  Getters for the label
         //******************************************
-        inline int getLabelInt() const {
-            REXBDD_DCASSERT(isLabelInt());
+        inline int getIntValue() const {
+            REXBDD_DCASSERT(isValueInt());
             return intValue;
         }
-        inline long getLabelLong() const {
-            REXBDD_DCASSERT(isLabelLong());
+        inline long getLongValue() const {
+            REXBDD_DCASSERT(isValueLong());
             return longValue;
         }
-        inline float getLabelFloat() const {
-            REXBDD_DCASSERT(isLabelFloat());
+        inline float getFloatValue() const {
+            REXBDD_DCASSERT(isValueFloat());
             return floatValue;
         }
-        inline double getLabelDouble() const {
-            REXBDD_DCASSERT(isLabelDouble());
+        inline double getDoubleValue() const {
+            REXBDD_DCASSERT(isValueDouble());
             return doubleValue;
         }
         inline EdgeRule getRule() const {
-            REXBDD_DCASSERT(isLabelRule());
+            REXBDD_DCASSERT(isValueRule());
             return rule;
         }
         inline bool getFlagComp() const {
@@ -173,69 +173,72 @@ class REXBDD::EdgeLabel {
         //******************************************
         // Alternate getters (better for templates)
         //******************************************
-        inline void get(int &v) const {
-            REXBDD_DCASSERT(isLabelInt());
+        inline void getValueTo(int &v) const {
+            REXBDD_DCASSERT(isValueInt());
             v = intValue;
         }
-        inline void get(long &v) const {
-            REXBDD_DCASSERT(isLabelLong());
+        inline void getValueTo(long &v) const {
+            REXBDD_DCASSERT(isValueLong());
             v = longValue;
         }
-        inline void get(float &v) const {
-            REXBDD_DCASSERT(isLabelFloat());
+        inline void getValueTo(float &v) const {
+            REXBDD_DCASSERT(isValueFloat());
             v = floatValue;
         }
-        inline void get(double &v) const {
-            REXBDD_DCASSERT(isLabelDouble());
+        inline void getValueTo(double &v) const {
+            REXBDD_DCASSERT(isValueDouble());
             v = doubleValue;
         }
-        inline void get(EdgeRule &v) const {
-            REXBDD_DCASSERT(isLabelRule());
+        inline void getRule(EdgeRule &v) const {
+            REXBDD_DCASSERT(isValueRule());
             v = rule;
         }
 
         //******************************************
         // Getters, for low-level storage objects
         //******************************************
-        inline void getLabelInt(void *p) const {
+        inline void getIntValueTo(void *p) const {
             REXBDD_DCASSERT(p);
-            get( *((int*) p) );
+            getValueTo( *((int*) p) );
         }
-        inline void getLabelLong(void *p) const {
+        inline void getLongValueTo(void *p) const {
             REXBDD_DCASSERT(p);
-            get( *((long*) p) );
+            getValueTo( *((long*) p) );
         }
-        inline void getLabelFloat(void *p) const {
+        inline void getFloatValueTo(void *p) const {
             REXBDD_DCASSERT(p);
-            get( *((float*) p) );
+            getValueTo( *((float*) p) );
         }
-        inline void getLabelDouble(void *p) const {
+        inline void getDoubleValueTo(void *p) const {
             REXBDD_DCASSERT(p);
-            get( *((double*) p) );
+            getValueTo( *((double*) p) );
         }
-        inline void getRule(void *p) const {
+        inline void getRuleTo(void *p) const {
             REXBDD_DCASSERT(p);
-            get( *((EdgeRule*) p) );
+            getRule( *((EdgeRule*) p) );
         }
-        inline void get(ValueType et, void* p) const {
+        inline void getValueTo(ValueType et, void* p) const {
             switch (et) {
                 case ValueType::VOID:
                     return;
+                case ValueType::RULE:
+                    getRuleTo(p);
+                    return;
 
                 case ValueType::INT:
-                    getLabelInt(p);
+                    getIntValueTo(p);
                     return;
 
                 case ValueType::LONG:
-                    getLabelLong(p);
+                    getLongValueTo(p);
                     return;
 
                 case ValueType::FLOAT:
-                    getLabelFloat(p);
+                    getFloatValueTo(p);
                     return;
 
                 case ValueType::DOUBLE:
-                    getLabelDouble(p);
+                    getDoubleValueTo(p);
                     return;
 
                 default:
@@ -246,30 +249,30 @@ class REXBDD::EdgeLabel {
         //******************************************
         // Setters
         //******************************************
-        inline void set() {
+        inline void setValue() {
             labelType = ValueType::VOID;
         }
-        inline void set(EdgeRule r) {
+        inline void setValue(EdgeRule r) {
             labelType = ValueType::RULE;
             rule = r;
         }
-        inline void set(int v) {
+        inline void setValue(int v) {
             labelType = ValueType::INT;
             intValue = v;
         }
-        inline void set(long v) {
+        inline void setValue(long v) {
             labelType = ValueType::LONG;
             longValue = v;
         }
-        inline void set(float v) {
+        inline void setValue(float v) {
             labelType = ValueType::FLOAT;
             floatValue = v;
         }
-        inline void set(double v) {
+        inline void setValue(double v) {
             labelType = ValueType::DOUBLE;
             doubleValue = v;
         }
-        inline void set(FlagType t) {
+        inline void setFlagType(FlagType t) {
             flagType = t;
         }
         inline void setComp(bool v) {
@@ -287,25 +290,25 @@ class REXBDD::EdgeLabel {
         }
         inline void setRule(const void *p) {
             REXBDD_DCASSERT(p);
-            set( *((const EdgeRule*) p) );
+            setValue( *((const EdgeRule*) p) );
         }
         inline void setInt(const void *p) {
             REXBDD_DCASSERT(p);
-            set( *((const int*) p) );
+            setValue( *((const int*) p) );
         }
         inline void setLong(const void *p) {
             REXBDD_DCASSERT(p);
-            set( *((const long*) p) );
+            setValue( *((const long*) p) );
         }
         inline void setFloat(const void *p) {
             REXBDD_DCASSERT(p);
-            set( *((const float*) p) );
+            setValue( *((const float*) p) );
         }
         inline void setDouble(const void *p) {
             REXBDD_DCASSERT(p);
-            set( *((const double*) p) );
+            setValue( *((const double*) p) );
         }
-        inline void set(ValueType et, const void* p) {
+        inline void setValue(ValueType et, const void* p) {
             switch (et) {
                 case ValueType::VOID:
                     setVoid(p);
@@ -343,19 +346,19 @@ class REXBDD::EdgeLabel {
         // Useful for normalization
         //******************************************
         inline void subtract(int v) {
-            REXBDD_DCASSERT(isLabelInt());
+            REXBDD_DCASSERT(isValueInt());
             intValue -= v;
         }
         inline void subtract(long v) {
-            REXBDD_DCASSERT(isLabelLong());
+            REXBDD_DCASSERT(isValueLong());
             longValue -= v;
         }
         inline void subtract(float v) {
-            REXBDD_DCASSERT(isLabelFloat());
+            REXBDD_DCASSERT(isValueFloat());
             floatValue -= v;
         }
         inline void subtract(double v) {
-            REXBDD_DCASSERT(isLabelDouble());
+            REXBDD_DCASSERT(isValueDouble());
             doubleValue -= v;
         }
 
@@ -365,22 +368,22 @@ class REXBDD::EdgeLabel {
         //******************************************
 
         inline void divide(int v) {
-            REXBDD_DCASSERT(isLabelInt());
+            REXBDD_DCASSERT(isValueInt());
             REXBDD_DCASSERT(v);
             intValue /= v;
         }
         inline void divide(long v) {
-            REXBDD_DCASSERT(isLabelLong());
+            REXBDD_DCASSERT(isValueLong());
             REXBDD_DCASSERT(v);
             longValue /= v;
         }
         inline void divide(float v) {
-            REXBDD_DCASSERT(isLabelFloat());
+            REXBDD_DCASSERT(isValueFloat());
             REXBDD_DCASSERT(v);
             floatValue /= v;
         }
         inline void divide(double v) {
-            REXBDD_DCASSERT(isLabelDouble());
+            REXBDD_DCASSERT(isValueDouble());
             REXBDD_DCASSERT(v);
             doubleValue /= v;
         }
@@ -428,7 +431,7 @@ class REXBDD::EdgeLabel {
             if (v.getFlagComp() != complement || v.getSwap() != swap) return false;
             switch (labelType) {
                 case ValueType::VOID:
-                    return v.isLabelVoid();
+                    return v.isValueVoid();
 
                 case ValueType::RULE:
                     return v.equals(rule);
@@ -456,7 +459,7 @@ class REXBDD::EdgeLabel {
         inline bool equals(const void* p) const {
             switch (labelType) {
                 case ValueType::VOID:
-                    return isLabelVoid();
+                    return isValueVoid();
 
                 case ValueType::RULE:
                     return equals( *((const EdgeRule*)p) );
