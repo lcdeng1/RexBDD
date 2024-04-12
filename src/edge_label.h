@@ -92,28 +92,28 @@ class REXBDD::EdgeLabel {
         EdgeLabel(double v);
 
         //******************************************
-        //  Getters for the type
+        //  Checkers for the type
         //******************************************
         inline bool isValueVoid() const {
-            return (labelType == ValueType::VOID);
+            return (valueType == ValueType::VOID);
         }
         inline bool isValueRule() const {
-            return (labelType == ValueType::RULE);
+            return (valueType == ValueType::RULE);
         }
         inline bool isValueInt() const {
-            return (labelType == ValueType::INT);
+            return (valueType == ValueType::INT);
         }
         inline bool isValueLong() const {
-            return (labelType == ValueType::LONG);
+            return (valueType == ValueType::LONG);
         }
         inline bool isValueFloat() const {
-            return (labelType == ValueType::FLOAT);
+            return (valueType == ValueType::FLOAT);
         }
         inline bool isValueDouble() const {
-            return (labelType == ValueType::DOUBLE);
+            return (valueType == ValueType::DOUBLE);
         }
         inline bool hasValueType(ValueType t) const {
-            return (labelType == t);
+            return (valueType == t);
         }
         inline bool isFlagComp() const {
             return (flagType == FlagType::COMP ||
@@ -137,6 +137,17 @@ class REXBDD::EdgeLabel {
         }
         inline bool hasFlagType(FlagType t) const {
             return (flagType == t);
+        }
+        // maybe the check methods can be removed?
+
+        //******************************************
+        //  Getters for the type
+        //******************************************
+        inline ValueType getValueType() const {
+            return valueType;
+        }
+        inline FlagType getFlagType() const {
+            return flagType;
         }
 
         //******************************************
@@ -189,7 +200,7 @@ class REXBDD::EdgeLabel {
             REXBDD_DCASSERT(isValueDouble());
             v = doubleValue;
         }
-        inline void getRule(EdgeRule &v) const {
+        inline void getValueTo(EdgeRule &v) const {
             REXBDD_DCASSERT(isValueRule());
             v = rule;
         }
@@ -215,7 +226,7 @@ class REXBDD::EdgeLabel {
         }
         inline void getRuleTo(void *p) const {
             REXBDD_DCASSERT(p);
-            getRule( *((EdgeRule*) p) );
+            getValueTo( *((EdgeRule*) p) );
         }
         inline void getValueTo(ValueType et, void* p) const {
             switch (et) {
@@ -250,26 +261,26 @@ class REXBDD::EdgeLabel {
         // Setters
         //******************************************
         inline void setValue() {
-            labelType = ValueType::VOID;
+            valueType = ValueType::VOID;
         }
         inline void setValue(EdgeRule r) {
-            labelType = ValueType::RULE;
+            valueType = ValueType::RULE;
             rule = r;
         }
         inline void setValue(int v) {
-            labelType = ValueType::INT;
+            valueType = ValueType::INT;
             intValue = v;
         }
         inline void setValue(long v) {
-            labelType = ValueType::LONG;
+            valueType = ValueType::LONG;
             longValue = v;
         }
         inline void setValue(float v) {
-            labelType = ValueType::FLOAT;
+            valueType = ValueType::FLOAT;
             floatValue = v;
         }
         inline void setValue(double v) {
-            labelType = ValueType::DOUBLE;
+            valueType = ValueType::DOUBLE;
             doubleValue = v;
         }
         inline void setFlagType(FlagType t) {
@@ -286,7 +297,7 @@ class REXBDD::EdgeLabel {
         // Setters, for low-level storage objects
         //******************************************
         inline void setVoid(const void *p) {
-            labelType = ValueType::VOID;
+            valueType = ValueType::VOID;
         }
         inline void setRule(const void *p) {
             REXBDD_DCASSERT(p);
@@ -392,19 +403,19 @@ class REXBDD::EdgeLabel {
         // Equality checks
         //******************************************
         inline bool equals(EdgeRule r) const {
-            if (labelType != ValueType::RULE) return false;
+            if (valueType != ValueType::RULE) return false;
             return r == rule;
         }
         inline bool equals(int v) const {
-            if (labelType != ValueType::INT) return false;
+            if (valueType != ValueType::INT) return false;
             return v == intValue;
         }
         inline bool equals(long v) const {
-            if (labelType != ValueType::LONG) return false;
+            if (valueType != ValueType::LONG) return false;
             return v == longValue;
         }
         inline bool equals(float v) const {
-            if (labelType != ValueType::FLOAT) return false;
+            if (valueType != ValueType::FLOAT) return false;
             if (v) {
                 double diff = v-floatValue;
                 return ABS(diff/v) < 1e-6;
@@ -413,7 +424,7 @@ class REXBDD::EdgeLabel {
             }
         }
         inline bool equals(double v) const {
-            if (labelType != ValueType::DOUBLE) return false;
+            if (valueType != ValueType::DOUBLE) return false;
             if (v) {
                 double diff = v-doubleValue;
                 return ABS(diff/v) < 1e-6;
@@ -429,7 +440,7 @@ class REXBDD::EdgeLabel {
         }
         inline bool equalsEdge(const EdgeLabel &v) const {
             if (v.getFlagComp() != complement || v.getSwap() != swap) return false;
-            switch (labelType) {
+            switch (valueType) {
                 case ValueType::VOID:
                     return v.isValueVoid();
 
@@ -457,7 +468,7 @@ class REXBDD::EdgeLabel {
         // Equality check, for low-level storage objects
         //******************************************
         inline bool equals(const void* p) const {
-            switch (labelType) {
+            switch (valueType) {
                 case ValueType::VOID:
                     return isValueVoid();
 
@@ -485,7 +496,7 @@ class REXBDD::EdgeLabel {
         // Hash the edge value.
         //******************************************
         inline void hash(hash_stream &h) const {
-            switch (labelType) {
+            switch (valueType) {
                 case ValueType::INT:
                     h.push(&intValue, sizeof(int));
                     return;
@@ -517,7 +528,7 @@ class REXBDD::EdgeLabel {
     private:
     /*-------------------------------------------------------------*/
         /// the type of this edge label
-        ValueType labelType;
+        ValueType valueType;
         /// the type of this edge flags
         FlagType flagType;
 
