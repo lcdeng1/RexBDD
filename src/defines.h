@@ -77,11 +77,22 @@ namespace REXBDD {
 
 }; // namespace
 
+
+// Use this for assertions that will fail only when your
+// code is wrong.  Handy for debugging.
+#ifdef DCASSERTS_ON
+#include <cassert>
+#define REXBDD_DCASSERT(X) assert(X)
+#else
+#define REXBDD_DCASSERT(X)
+#endif
+
+
 //
 // Typedefs and constants
 //
 
-namespace MEDDLY {
+namespace REXBDD {
 
     /** Handles for nodes.
         This should be either int or long, and effectively limits
@@ -92,12 +103,12 @@ namespace MEDDLY {
         per forest, at the expense of nearly doubling the memory used.
         This also specifies the incoming count range for each node.
     */
-    typedef long  node_handle;
+    typedef long  nodeHandle;
 
     /** Handles for relation nodes.
         TBD: can we just use node_handle everywhere?
      */
-    typedef int  rel_node_handle;
+    typedef int  rel_nodeHandle;
 
     /** Node addresses.
         This is used for internal storage of a node,
@@ -105,7 +116,7 @@ namespace MEDDLY {
         The typedef is given simply to clarify the code
         (hopefully :^)
     */
-    typedef unsigned long node_address;
+    typedef unsigned long nodeAddress;
 
 }; // namespace
 
