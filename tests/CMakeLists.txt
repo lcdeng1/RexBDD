@@ -3,6 +3,13 @@
 #
 file(GLOB TEST_SOURCES "*.cc" "*.cpp")
 
+# Add compile options
+if (MSVC)
+  add_compile_options(/W4 /WX)
+else()
+  add_compile_options(-Wall -Wextra -Wshadow -Wunused -Wno-c++11-extensions -Wno-unused-parameter)
+endif()
+
 # 
 # Test executables
 #   Assuming only one source file for each executable
