@@ -32,18 +32,40 @@ namespace REXBDD {
         /// only complement flag
         COMP,
         /// only swap flag
-        //      swap-one, swap-all, or mix for nonrelation BDDs
+        //      swap-one, swap-all, swap-oneAll (swap one and all) or mix for nonrelation BDDs
         //          mix is using swap_mix[2]
-        SWAP_ONE, SWAP_ALL, SWAP_MIX,
+        SWAP_ONE, SWAP_ALL, SWAP_ONEALL, SWAP_MIX,
         /// relation only swap flag
-        //      swap-from, swap-to, swap-all, or mix for relation BDDs
+        //      swap-from, swap-to, swap-all (swap from and to), or mix for relation BDDs
         //          mix is using swap_mix[2]
         REL_SWAP_FROM, REL_SWAP_TO, REL_SWAP_ALL, REL_SWAP_MIX,
         /// both complement and swap (one, all, or mix) flags
-        CO_SWAP_ONE, CO_SWAP_ALL, CO_SWAP_MIX,
+        CO_SWAP_ONE, CO_SWAP_ALL, CO_SWAP_ONEALL, CO_SWAP_MIX,
         /// relation only for complement and swap (from, to, all, or mix) flags
         REL_CO_SWAP_FROM, REL_CO_SWAP_TO, REL_CO_SWAP_ALL, REL_CO_SWAP_MIX
     } FlagType;
+
+    //--------------------------+---------------------------+-----------------|
+    // EL0    AL0 |  EL1    AL1 |  EH0    AH0 |  EH1    AH1 |  I0    X    I1
+    //------------+-------------+-------------+-------------+-----------------|
+    // 0      0   |  0      0   |  0      0   |  0      0   |  1     1    1
+    // 0      0   |  0      0   |  1      1   |  1      1   |  0     0    0
+    // 0      0   |  1      1   |  0      0   |  1      1   |  0     0    1
+    // 0      1   |  0      1   |  0      1   |  0      1   |  0     1    0
+    //------------+-------------+-------------+-------------+-----------------|
+    // 0      1   |  2      3   |  4      5   |  6      7   |  8     9    10
+    //--------------------------+---------------------------+-----------------|
+    // Note:
+    //      check X: rule == 1001; 
+    //  otherwise
+    //      check relation: rule > 7;
+    //      check (?)1: rule & (0010);
+    //  Complement rule:
+    //      rule == X ? X :
+    //          (rule & (0010)) ? (rule & (1101)) : (rule | (0010));
+    //  Swap rule:
+    //      rule >7 ? rule :
+    //          (rule & (0010)) ? (rule & (1011)) : (rule | (0100));
 
     // Reducation rules on edges
     typedef enum {
@@ -55,9 +77,9 @@ namespace REXBDD {
         AL1 = 3,
         AH0 = 5,
         AH1 = 7,
-        X   = 10,
+        X   = 9,
         I0  = 8,
-        I1  = 9,
+        I1  = 10,
     } EdgeRule;
 
     class EdgeLabel;
@@ -92,7 +114,7 @@ class REXBDD::EdgeLabel {
         EdgeLabel(double v);
 
         //******************************************
-        //  Checkers for the type
+        //  Checkers for the value type
         //******************************************
         inline bool isValueVoid() const {
             return (valueType == ValueType::VOID);
@@ -115,25 +137,67 @@ class REXBDD::EdgeLabel {
         inline bool hasValueType(ValueType t) const {
             return (valueType == t);
         }
+        //******************************************
+        //  Checkers for the flag type
+        //******************************************
+        inline bool isFlagRel() const {
+            return (flagType == FlagType::REL_CO_SWAP_FROM ||
+                    flagType == FlagType::REL_CO_SWAP_TO ||
+                    flagType == FlagType::REL_CO_SWAP_ALL ||
+                    flagType == FlagType::REL_CO_SWAP_MIX ||
+                    flagType == FlagType::REL_SWAP_FROM ||
+                    flagType == FlagType::REL_SWAP_TO ||
+                    flagType == FlagType::REL_SWAP_ALL ||
+                    flagType == FlagType::REL_SWAP_MIX);
+        }
         inline bool isFlagComp() const {
             return (flagType == FlagType::COMP ||
                     flagType == FlagType::CO_SWAP_ONE ||
                     flagType == FlagType::CO_SWAP_ALL ||
+                    flagType == FlagType::CO_SWAP_ONEALL ||
                     flagType == FlagType::CO_SWAP_MIX ||
                     flagType == FlagType::REL_CO_SWAP_FROM ||
                     flagType == FlagType::REL_CO_SWAP_TO ||
                     flagType == FlagType::REL_CO_SWAP_ALL ||
                     flagType == FlagType::REL_CO_SWAP_MIX);
         }
+        inline bool isComp() const {
+            if (isFlagComp()) return complement;
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
         inline bool isFlagSwap() const {
             return !(flagType == FlagType::COMP ||
                     flagType == FlagType::NAIVE);
+        }
+        inline bool isFlagSwapOne() const {
+            return (flagType == FlagType::SWAP_ONE ||
+                    flagType == FlagType::SWAP_ONEALL ||
+                    flagType == FlagType::SWAP_MIX ||
+                    flagType == FlagType::CO_SWAP_ONE ||
+                    flagType == FlagType::CO_SWAP_ONEALL ||
+                    flagType == FlagType::CO_SWAP_MIX);
+        }
+        inline bool isFlagSwapAll() const {
+            return (flagType == FlagType::SWAP_ALL ||
+                    flagType == FlagType::SWAP_ONEALL ||
+                    flagType == FlagType::SWAP_MIX ||
+                    flagType == FlagType::CO_SWAP_ALL ||
+                    flagType == FlagType::CO_SWAP_ONEALL ||
+                    flagType == FlagType::CO_SWAP_MIX);
         }
         inline bool isFlagSwapMix() const {
             return (flagType == FlagType::SWAP_MIX ||
                     flagType == FlagType::CO_SWAP_MIX ||
                     flagType == FlagType::REL_SWAP_MIX ||
                     flagType == FlagType::REL_CO_SWAP_MIX);
+        }
+        inline bool isNoSwap() const {
+            if (isFlagSwapMix()) {
+                return (!swapMix[0]) && (!swapMix[1]);
+            } else if (isFlagSwap()) {
+                return !swap;
+            }
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
         }
         inline bool hasFlagType(FlagType t) const {
             return (flagType == t);
@@ -153,6 +217,9 @@ class REXBDD::EdgeLabel {
         //******************************************
         //  Getters for the label
         //******************************************
+        //
+        // Values
+        //
         inline int getIntValue() const {
             REXBDD_DCASSERT(isValueInt());
             return intValue;
@@ -173,11 +240,53 @@ class REXBDD::EdgeLabel {
             REXBDD_DCASSERT(isValueRule());
             return rule;
         }
+        inline EdgeRule getCompRule() const {
+            if (isValueRule() && isFlagComp()) {
+                if (rule == X) {
+                    return rule;
+                } else if (rule & 2) {
+                    return (EdgeRule)(rule & 13);
+                } else {
+                    return (EdgeRule)(rule | 2);
+                }
+            }
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        inline EdgeRule getSwapRule() const {
+            if (isValueRule() && isFlagSwapAll()) {
+                if (rule > 7) {
+                    return rule;
+                } else if (rule & 2) {
+                    return (EdgeRule)(rule & 11);
+                } else {
+                    return (EdgeRule)(rule | 4);
+                }
+            }
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        //
+        // Flags
+        //
         inline bool getFlagComp() const {
             return complement;
         }
         inline bool getSwap() const {
             if (!isFlagSwapMix()) return swap;
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        // Only used for swap-mix type, also used for swap-from if it is relarion
+        inline bool getSwapOne() const {
+            if (isFlagSwapMix()) return swapMix[0];
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        // Only used for swap-mix type, also used for swap-to if it is relarion
+        inline bool getSwapAll() const {
+            if (isFlagSwapMix()) return swapMix[1];
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        // Only used for swap-mix type, also used for swap-all if it is relarion
+        inline bool getSwapOneAll() const {
+            if (isFlagSwapMix()) return swapMix[0] && swapMix[1];
             throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
         }
 
@@ -283,16 +392,39 @@ class REXBDD::EdgeLabel {
             valueType = ValueType::DOUBLE;
             doubleValue = v;
         }
-        inline void setFlagType(FlagType t) {
+        inline void setValueType(ValueType t) {
+            valueType = t;
+        }
+        inline void setFlagType(FlagType t) { 
             flagType = t;
         }
         inline void setComp(bool v) {
             complement = v;
         }
         inline void setSwap(bool v) {
-            swap = v;
+            if (!isFlagSwapMix() && isFlagSwap()) {
+                swap = v;
+            }
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
         }
-
+        // Only used for swap-mix type, also used for swap-from if it is relarion
+        inline void setSwapOne(bool v) {
+            if (isFlagSwapMix()) swapMix[0] = v;
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        // Only used for swap-mix type, also used for swap-to if it is relarion
+        inline void setSwapAll(bool v) {
+            if (isFlagSwapMix()) swapMix[1] = v;
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
+        // Only used for swap-mix type, also used for swap-all if it is relarion
+        inline void setSwapOneAll(bool v) {
+            if (isFlagSwapMix()) {
+                swapMix[0] = v;
+                swapMix[1] = v;
+            }
+            throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+        }
         //******************************************
         // Setters, for low-level storage objects
         //******************************************
@@ -556,6 +688,8 @@ class REXBDD::EdgeLabel {
 
         /// complement flag, always initialized 0
         bool complement;
+
+        /// 5 bytes unused because of padding
         
 };
 

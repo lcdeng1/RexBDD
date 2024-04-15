@@ -71,20 +71,35 @@ class REXBDD::Edge {
         inline void getEdgeValueTo(T &v) const {
             label.getValueTo(v);
         }
+        //
+        // More getter TBD here
+        //
 
         //******************************************
         //  Setters
         //******************************************
-        void setTarget(nodeHandle t);
+        inline void setEdgeValueType(ValueType t) {
+            label.setValueType(t);
+        }
+        inline void setEdgeFlagType(FlagType t) {
+            label.setFlagType(t);
+        }
         template<typename T>
         inline void setEdgeValue(T v) {
             label.setValue(v);
         }
+        // doing link at the same time
+        void setTarget(nodeHandle t);
+
         template<typename T>
         inline void set(nodeHandle handle, T value) {
             setTarget(handle);
             setEdgeValue(value);
         }
+
+        //
+        // More setter TBD here
+        //
 
         //******************************************
         //  Check for equality
@@ -98,6 +113,7 @@ class REXBDD::Edge {
     /*-------------------------------------------------------------*/
         friend class Forest;
 
+        // used for constructor given an edge, and assignment
         void init(const Edge &e);
         
         //

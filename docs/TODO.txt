@@ -1,0 +1,27 @@
+1. edge_label.h
+    file I/O;
+
+2. edge.h
+    getters and setters
+    init();
+
+3. node.h
+    everything
+
+4. node_manager.h
+    everything
+
+5. forest.h
+    everything
+
+6. io.h
+    everything;
+    lexer and parser in the future to read the standard BDD format file.
+
+x. initializer methods implementation
+    wait for the implementation of other parts:
+        memory manager,
+        node storage,
+        computing table,
+        forest,
+        statics parts
