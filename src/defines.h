@@ -103,7 +103,7 @@ namespace REXBDD {
         per forest, at the expense of nearly doubling the memory used.
         This also specifies the incoming count range for each node.
     */
-    typedef long  nodeHandle;
+    typedef long long  nodeHandle;
 
     /** Handles for relation nodes.
         TBD: can we just use node_handle everywhere?
