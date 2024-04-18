@@ -182,11 +182,11 @@
             Any subset of supported
         
     * Unique Tables:
-        level 1: UT 1
-        level 2: UT 2
-        level 3: UT 3
+        level/var 1: UT 1
+        level/var 2: UT 2
+        level/var 3: UT 3
             ...
-        level L: UT L
+        level/var L: UT L
 
     * Node Manager:
         1. Single array of node handles
@@ -199,6 +199,9 @@
 
     * Forests:
         Array of all forests
+
+    * FID:
+        Index in Forests
 
     KEY Methods:
         1. createForest():
@@ -234,8 +237,42 @@
                                  ++++++++++++++++++++
 ================================|| Computing Table: ||=================================
                                  --------------------
-
-
+                (entries hashValue)
+                        |
+                        |   [check / insert]
+                        |
+    Pointers:           v
+             _______________________________________________________________
+            |  ptr  |  ptr  | null  |  ptr  |       ...     |  null |  ptr  |
+             ––––––––––––––––––––––––––––––––––——–––––––––––––––––––––––––––
+                    /
+                   /
+                  /
+                 /
+                / point to the memory slot
+               /                   
+              /
+             /
+            |
+            v                   (Results in Memory Slot)
+             _______________________________________________________________
+            |  next |       |       |       |       ...     |       |       |   -|
+             ––––––––––––––––––––––––––––––––––——–––––––––––––––––––––––––––     |
+                |                                                                |
+                v                                                                |      Depth 3
+             _______________________________________________                     |      Size depends on
+            |  next |       |       ...     |       |       |                    |––––  Operators
+             ––––––––––––––––––––––––––––––––––——–––––––––––                     |
+                |                                                                |
+                v                                                                |
+             _______________________________________________________             |
+            |  null |       |       |       |       ...     |       |           -|
+             ––––––––––––––––––––––––––––––––––——–––––––––––––––––––
+    * Entries:
+        Operator Name,
+        Operands:
+            Forests: FID
+            Edges: level, edgeLabels, nodeHandles
 
 
 
