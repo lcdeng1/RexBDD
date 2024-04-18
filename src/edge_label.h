@@ -67,7 +67,7 @@ namespace REXBDD {
     //      rule >7 ? rule :
     //          (rule & (0010)) ? (rule & (1011)) : (rule | (0100));
 
-    // Reducation rules on edges
+    // Reduction rules on edges
     typedef enum {
         EL0 = 0,
         EL1 = 2,
