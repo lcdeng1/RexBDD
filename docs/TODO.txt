@@ -1,3 +1,6 @@
+*–––––––––––––––––––––––––––––––––––––––––––––
+* TODOs (Updating)
+*–––––––––––––––––––––––––––––––––––––––––––––
 1. edge_label.h
     file I/O;
 
@@ -14,10 +17,13 @@
 5. node_manager.h
     everything
 
-6. forest.h
+6. unique_table.h
     everything
 
-7. io.h
+7. forest.h
+    everything
+
+8. io.h
     everything;
     lexer and parser in the future to read the standard BDD format file.
 
