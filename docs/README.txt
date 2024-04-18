@@ -145,7 +145,7 @@
             Note: In either case, the returned node handle becomes the front entry of 
             the hash chain.
         2. sweep():
-            Remove all marked or unmarked ndoe handles from the unique table.
+            Remove all marked or unmarked node handles from the unique table.
                                      +++++++++++
 ====================================|| Forest: ||======================================
                                      -----------
@@ -273,6 +273,17 @@
         Operands:
             Forests: FID
             Edges: level, edgeLabels, nodeHandles
+
+    KEY Methods:
+    1. check(Entries, Result):
+        Check the result of the given entries.
+        If cached, return 1 and save the result to Result object;
+        otherwise, return 0.
+    2. cache(Entries, Result):
+        Insert the given entries and corresponding result into computing table.
+        If the hash chain has reached the depth 3, overwrite the front.
+    3. sweep():
+        Remove all the elements that contains marked or unmarked node handles.
 
 
 
