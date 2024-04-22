@@ -45,7 +45,7 @@ namespace REXBDD {
     } ReductionType;
     /// Swap flag type
     typedef enum {
-        NAIVE,              // No swap flags are used
+        NO_SWAP,            // No swap flags are used
         ONE,                // Swap-one flags are used
         ALL,                // Swap-all flags are used (placeholder)
         FROM,               // Swap flags are used only for unprimed variables
@@ -54,7 +54,7 @@ namespace REXBDD {
     } SwapSet;
     /// Complement flag type
     typedef enum {
-        NAIVE,              // No complement flags are used
+        NO_COMP,            // No complement flags are used
         COMP,               // Complement flags are used
     } CompSet;
 

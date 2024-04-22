@@ -54,7 +54,9 @@ class REXBDD::Edge {
         inline bool isSameForest(const Edge &e) const {
             return parentFID == e.parentFID;
         }
-
+        inline int getEdgeLevel() const {
+            return level;
+        }
         inline nodeHandle getTarget() const {
             return targetNode;
         }
@@ -64,12 +66,18 @@ class REXBDD::Edge {
         inline ValueType getEdgeValueType() const {
             return label.getValueType();
         }
-        inline FlagType getEdgeFlagType() const {
-            return label.getFlagType();
-        }
         template<typename T>
         inline void getEdgeValueTo(T &v) const {
             label.getValueTo(v);
+        }
+        inline ReductionRule getEdgeRule() const {
+            return label.getRule();
+        }
+        inline bool getEdgeComp() const {
+            return label.getComp();
+        }
+        inline bool getEdgeSwap() const {
+            return label.getSwap();
         }
         //
         // More getter TBD here
@@ -78,36 +86,50 @@ class REXBDD::Edge {
         //******************************************
         //  Setters
         //******************************************
+        inline void setEdgeLevel(int lvl) {
+            level = lvl;
+        }
+        inline void setTarget(nodeHandle t) {
+            targetNode = t;
+        }
         inline void setEdgeValueType(ValueType t) {
             label.setValueType(t);
-        }
-        inline void setEdgeFlagType(FlagType t) {
-            label.setFlagType(t);
         }
         template<typename T>
         inline void setEdgeValue(T v) {
             label.setValue(v);
         }
-        // doing link at the same time
-        void setTarget(nodeHandle t);
-
+        inline void setEdgeRule(ReductionRule r) {
+            label.setRule(r);
+        }
+        inline void setEdgeComp(bool c) {
+            label.setComp(c);
+        }
+        inline void setEdgeSwap(bool s) {
+            label.setSwap(s);
+        }
         template<typename T>
-        inline void set(nodeHandle handle, T value) {
+        inline void set(nodeHandle handle, T val) {
             setTarget(handle);
-            setEdgeValue(value);
+            setEdgeValue(val);
+        }
+        inline void set(nodeHandle handle, ReductionRule rul) {
+            setTarget(handle);
+            setEdgeRule(rul);
         }
 
         //
         // More setter TBD here
         //
+        /// Complement edge rule
+        void compEdgeRule();
+        /// Swap edge rule
+        void swapEdgeRule();
 
         //******************************************
         //  Check for equality
         //******************************************
-        inline bool equals(const Edge e) {
-            return
-                (parentFID == e.parentFID);
-        }
+        bool equals(const Edge e);
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
@@ -119,23 +141,18 @@ class REXBDD::Edge {
         //
         // Actual edge information
         //
+        int             level;          // Incoming level, >= target node's level
+        nodeHandle      targetNode;     // Target node
+        EdgeLabel       label;          // Label including rule, value, flags
 
-        /// ID of parent forest
-        unsigned parentFID;
+        Forest*         parent;         // parent forest
+        unsigned        parentFID;      // ID of parent forest
 
-        /// Target node
-        nodeHandle targetNode;
-
-        /// Label on this edge
-        EdgeLabel label;
-
-        /// for displaying if needed in the future
-        std::string display;
+        std::string     display;        // for displaying if needed in the future
 
         //
         // for the dd_edge registry in the parent forest
         //
-
         /// Previous edge in forest registry
         Edge* prevEdge;
 

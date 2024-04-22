@@ -118,6 +118,7 @@ namespace REXBDD {
     */
     typedef unsigned long nodeAddress;
 
+    // int POINTER_SIZE = sizeof(void*);
 }; // namespace
 
 #endif

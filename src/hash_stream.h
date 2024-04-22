@@ -69,12 +69,12 @@ class REXBDD::hash_stream {
 #endif
         return z[0];
     }
-    inline long long finish64() {
+    inline unsigned long finish64() {
         final_mix();
 #ifdef DEBUG_HASH
         printf("hash_stream::finish: %u,%u\n", z[0], z[1]);
 #endif
-        long long foo = z[0];
+        unsigned long foo = z[0];
         foo <<= 32;
         foo |= z[1];
         return foo;
