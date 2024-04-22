@@ -123,7 +123,7 @@ class REXBDD::hash_stream {
                 slot = 1;
                 return;
 
-            default: throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+            default: throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
         };
     }
     inline void push(unsigned v1, unsigned v2, unsigned v3) {
@@ -158,7 +158,7 @@ class REXBDD::hash_stream {
                 z[0] += v3;
                 return;
 
-            default: throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+            default: throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
         };
     }
     inline void push(const void* data, std::size_t bytes) {
@@ -257,7 +257,7 @@ class REXBDD::hash_stream {
             return;
 
         default:
-            throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+            throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
       }
     }
 

@@ -184,7 +184,7 @@ class REXBDD::EdgeLabel {
                     return;
 
                 default:
-                    throw error(REXBDD::error::MISCELLANEOUS, __FILE__, __LINE__);
+                    throw error(REXBDD::ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
             }
         }
 
@@ -222,7 +222,7 @@ class REXBDD::EdgeLabel {
         inline void setRule(ReductionRule r) {
             valueType = ValueType::VOID;
             if (r < EL0 || r > I1) {
-                throw error(REXBDD::error::VALUE_OVERFLOW, __FILE__, __LINE__);
+                throw error(REXBDD::ErrCode::VALUE_OVERFLOW, __FILE__, __LINE__);
             }
             rule = r;
         }
@@ -290,7 +290,7 @@ class REXBDD::EdgeLabel {
                     return;
 
                 default:
-                    throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+                    throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
             }
         }
 
@@ -404,7 +404,7 @@ class REXBDD::EdgeLabel {
                     return v.equals(doubleValue);
 
                 default:
-                    throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+                    throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
             }
         }
 
@@ -429,7 +429,7 @@ class REXBDD::EdgeLabel {
                     return equals( *((const double*)p) );
 
                 default:
-                    throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+                    throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
             }
         }
 
@@ -460,7 +460,7 @@ class REXBDD::EdgeLabel {
                         return;
                     }
                 default:
-                    throw error(error::MISCELLANEOUS, __FILE__, __LINE__);
+                    throw error(ErrCode::MISCELLANEOUS, __FILE__, __LINE__);
             }
         }
 
