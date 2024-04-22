@@ -1,6 +1,6 @@
 #include "defines.h"
 #include "initializer.h"
-#include "revision.h"
+#include "info.h"
 
 // ******************************************************************
 // *                                                                *
@@ -22,12 +22,14 @@ void REXBDD::InitializerList::setUpList(InitializerList* L)
 {
     // TBD
     // wait for other parts
+    isRunning = true;
 }
 
 void REXBDD::InitializerList::cleanUpList()
 {
     // TBD
     // wait for other parts
+    isRunning = false;
 }
 
 // ******************************************************************
