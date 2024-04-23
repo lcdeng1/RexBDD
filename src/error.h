@@ -75,10 +75,11 @@ class REXBDD::error {
 
         // Override what() method to return error message
         const char* what() const{
-            formattedMessage = getName();
-            formattedMessage += ": File";
+            formattedMessage = "[RexBDD] ERROR!\t";
+            formattedMessage += getName();
+            formattedMessage += ": \n\tFile: \t";
             formattedMessage += fileName;
-            formattedMessage += ": Line ";
+            formattedMessage += ": \n\tLine: \t";
             formattedMessage += std::to_string(lineNo);
             formattedMessage += "\n";
 
