@@ -11,20 +11,12 @@ namespace REXBDD {
     ///  Range type
     typedef enum {
         BOOLEAN,            // {0, 1}
-        FINITE,             // {0, 1, 2, ..., N-1}, N is determined in Range
-        FINITE_POSINF,      // {0, 1, 2, ..., N-1, N} U {+∞}, N is determined in Range
-        FINITE_NEGPOSINF,   // {0, 1, 2, ..., N-1, N} U {+∞, -∞}, N is determined in Range
+        FINITE1,            // {0, 1, 2, ..., N-1}, N is determined in Range
+        FINITE,             // {0, 1, 2, ..., N-1, N}, N is determined in Range
         NATURAL,            // {0, 1, 2, ...}
-        NATURAL_POSINF,     // {0, 1, 2, ...} U {+∞}
         INTEGER,            // {..., -2, -1, 0, 1, 2, ...}
-        INTEGER_POSINF,     // {..., -2, -1, 0, 1, 2, ...} U {+∞}
-        INTEGER_NEGPOSINF,  // {..., -2, -1, 0, 1, 2, ...} U {-∞, +∞}
         NNREAL,             // [0, +∞)
-        NNREAL_POSINF,      // [0, +∞]
-        REAL,               // (-∞, +∞)
-        REAL_NEGINF,        // [-∞, +∞)
-        REAL_POSINF,        // (-∞, +∞]
-        REAL_NEGPOSINF      // [-∞, +∞]
+        REAL                // (-∞, +∞)
     } RangeType;
     /// Encoding mechanism
     typedef enum {
@@ -123,9 +115,9 @@ class REXBDD::VarDomain {
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
-        unsigned            maxLevel;
-        std::vector<int>    level2Var;
-        std::vector<int>    var2Level;
+        unsigned            maxLevel;   // number of variables
+        std::vector<int>    level2Var;  // Variable order: indexed by levels
+        std::vector<int>    var2Level;  // Variable order: indexed by variables
 };
 
 // ******************************************************************
@@ -147,6 +139,9 @@ class REXBDD::Range {
     /*-------------------------------------------------------------*/
         RangeType       type;
         int             maxRange;       // used only if type is FINITE*
+        bool            hasNegInf;      // 1 if -∞ is allowed
+        bool            hasPosInf;      // 1 if +∞ is allowed
+        bool            hasUnDef;       // 1 if UnDef is allowed
 };
 
 // ******************************************************************
@@ -167,9 +162,9 @@ class REXBDD::Reductions {
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
-        int             size;
-        ReductionType   type;
-        ReductionRule*  rules;
+        int             size;       // number of allowed reduction rules
+        ReductionType   type;       // type of reductions
+        ReductionRule*  rules;      // set of allowed reduction rules
 };
 
 // ******************************************************************
@@ -196,13 +191,13 @@ class REXBDD::ForestSetting {
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
-        int             dimension;
-        VarDomain       domain;
-        Range           rangeType;
-        EncodeMechanism encodingType;
-        Reductions      reductions;
-        SwapSet         swapType;
-        CompSet         compType;
+        int             dimension;      // 1: set/vector function; 2: relation/matrix function
+        VarDomain       domain;         // Variable domain: number of variables, variable order
+        Range           rangeType;      // Range type and special values
+        EncodeMechanism encodingType;   // Encoding mechanism: terminal, edge-valued
+        Reductions      reductions;     // Reduction: number of rules, set of rules
+        SwapSet         swapType;       // Swap flag type
+        CompSet         compType;       // Complement flag type
 };
 
 
