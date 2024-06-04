@@ -26,6 +26,12 @@ class REXBDD::Node {
 
     ~Node();
 
+    /// Get this node's hash value
+    inline unsigned long hash() const { return hashValue; }
+
+    /// Compute the node's hash value
+    void computeHash();
+
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
@@ -42,7 +48,7 @@ class REXBDD::Node {
     EdgeLabel childEdge[2];
 
     /// Hash of the node
-    long long hashValue;
+    unsigned long hashValue;
     
     
     /// ID of the parent forest

@@ -20,8 +20,3 @@ REXBDD::Edge::~Edge()
 {
 
 }
-
-void REXBDD::Edge::setTarget(nodeHandle t)
-{
-
-}
