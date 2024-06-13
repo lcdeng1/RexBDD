@@ -25,6 +25,58 @@
 #include <cstring>
 #include <cstdarg>
 #include <limits>
+#include <cmath>
+
+//
+// Typedefs and constants
+//
+#define LEVEL_LIMIT 32    // This limits the max number of possible levels: 2^32-1
+#define HANDLE_LENGTH 64
+
+namespace REXBDD {
+    /**
+     *  Null-terminated sequence of primes to use as hash table sizes.
+     *  About this list:
+     *      (1) They approximately double in size until about 2 million
+     *      (2) They increase by about 1.4 (square root of 2) until
+     *          about 400 million
+     *      (3) They increase by about 1.26 (cube root of 3) to the end
+     *      (4) The list stops around 2^49.
+     *
+     */
+    static const uint64_t PRIMES[] = {
+        2, 5, 11, 23, 47, 97, 193, 389, 773, 
+        1009, 2027, 4057, 8117, 16249, 32503, 65011, 130027, 260081, 520193,
+        1040387, 2080777, 2913139, 4078397, 5709757, 7993663, 11191153, 15667633,
+        21934691, 30708577, 42992021, 60188837, 84264377, 117970133, 165158207,
+        231221491, 323710097, 407874751, 513922187, 647541971, 815902909,
+        1028037671, 1295327513, 1632112667, 2056461989, 2591142131, 3264839087,
+        4113697319, 5183258669, 6530905951, 8228941499, 10368466351, 13064267633,
+        16460977223, 20740831313, 26133447503, 32928143879, 41489461309,
+        52276721261, 65868668837, 82994522759, 104573098691, 131762104351,
+        166020251489, 209185516877, 263573751283, 332102926681, 418449687637,
+        527246606423, 664330724111, 837056712409, 1054691457653, 1328911236643,
+        1674428158229, 2109779479439, 2658322144133, 3349485901661, 4220352236131,
+        5317643817529, 6700231210093, 8442291324737, 10637287069183,
+        13402981707197, 16887756951073, 21278573758373, 26811002935583,
+        33781863698897, 42565148260643, 53632086808429, 67576429378651,
+        85146301017101, 107284339281571, 135178267494863, 170324617043543,
+        214609017474941, 270407362018439, 340713276143243, 429298727940493,
+        540916397205031, 0 };
+
+    /**
+     *  Handles for nodes storage
+     *  This effectively limits the number of possible nodes per forest.
+     *  Each handle is constructed as:
+     *                  [ level | index ]
+     *  "level" occupies the least number of bits to cover the largest 
+     *  number of levels in the forest: |log(maxLevel)| <= LEVEL_LIMIT
+     *  "index" in node manager occupies the rest bits
+     *
+     */
+    typedef uint64_t NodeHandle;
+
+}; // namespace
 
 // Handy Constants
 
@@ -87,69 +139,5 @@ namespace REXBDD {
 #define REXBDD_DCASSERT(X)
 #endif
 
-
-//
-// Typedefs and constants
-//
-
-namespace REXBDD {
-    /*
-    *  Null-terminated sequence of primes to use as hash table sizes.
-    *  About this list:
-    *      (1) They approximately double in size until about 2 million
-    *      (2) They increase by about 1.4 (square root of 2) until
-    *          about 400 million
-    *      (3) They increase by about 1.26 (cube root of 3) to the end
-    *      (4) The list stops around 2^49.
-    *
-    */
-    static const uint64_t PRIMES[] = {
-        2, 5, 11, 23, 47, 97, 193, 389, 773, 
-        1009, 2027, 4057, 8117, 16249, 32503, 65011, 130027, 260081, 520193,
-        1040387, 2080777, 2913139, 4078397, 5709757, 7993663, 11191153, 15667633,
-        21934691, 30708577, 42992021, 60188837, 84264377, 117970133, 165158207,
-        231221491, 323710097, 407874751, 513922187, 647541971, 815902909,
-        1028037671, 1295327513, 1632112667, 2056461989, 2591142131, 3264839087,
-        4113697319, 5183258669, 6530905951, 8228941499, 10368466351, 13064267633,
-        16460977223, 20740831313, 26133447503, 32928143879, 41489461309,
-        52276721261, 65868668837, 82994522759, 104573098691, 131762104351,
-        166020251489, 209185516877, 263573751283, 332102926681, 418449687637,
-        527246606423, 664330724111, 837056712409, 1054691457653, 1328911236643,
-        1674428158229, 2109779479439, 2658322144133, 3349485901661, 4220352236131,
-        5317643817529, 6700231210093, 8442291324737, 10637287069183,
-        13402981707197, 16887756951073, 21278573758373, 26811002935583,
-        33781863698897, 42565148260643, 53632086808429, 67576429378651,
-        85146301017101, 107284339281571, 135178267494863, 170324617043543,
-        214609017474941, 270407362018439, 340713276143243, 429298727940493,
-        540916397205031, 0 };
-
-    /** Handles for nodes.
-        This should be either int or long, and effectively limits
-        the number of possible nodes per forest.
-        As an int, we get 2^32-1 possible nodes per forest,
-        which should be enough for most applications.
-        As a long on a 64-bit machine, we get 2^64-1 possible nodes
-        per forest, at the expense of nearly doubling the memory used.
-        This also specifies the incoming count range for each node.
-
-        the typedef may be decided by systems in the future (initialization?)
-    */
-    typedef long long  nodeHandle;
-
-    /** Handles for relation nodes.
-        TBD: can we just use node_handle everywhere?
-     */
-    typedef int  rel_nodeHandle;
-
-    /** Node addresses.
-        This is used for internal storage of a node,
-        and should probably not be changed.
-        The typedef is given simply to clarify the code
-        (hopefully :^)
-    */
-    typedef unsigned long nodeAddress;
-
-    // int POINTER_SIZE = sizeof(void*);
-}; // namespace
 
 #endif

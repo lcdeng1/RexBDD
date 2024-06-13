@@ -8,16 +8,6 @@
 
 //
 namespace REXBDD {
-    /// Value type
-    //      Note: used only for EVBDDs different value range and precision
-    typedef enum {
-        VOID,               //  Nothing, for BDDs without values on edges
-        INT,                //  Integer
-        LONG,               //  Long
-        FLOAT,              //  Float
-        DOUBLE              //  Double
-    } ValueType;
-
     class EdgeLabel;
 
     // input and output

@@ -3,7 +3,6 @@
 
 #include "defines.h"
 #include "node_manager.h"
-#include "forest.h"
 
 namespace REXBDD {
     class Forest;
@@ -21,6 +20,7 @@ class REXBDD::UniqueTable {
     /*-------------------------------------------------------------*/
     public:
     /*-------------------------------------------------------------*/
+        UniqueTable();
         UniqueTable(Forest *f);
         ~UniqueTable();
 
@@ -42,12 +42,12 @@ class REXBDD::UniqueTable {
         /** If the table of the given variable level contains key node, return the item 
          * and move it to the front of the list. Otherwise, return 0 and do nothing.
          */
-        inline nodeHandle find(Node &key, int level) const {return tables[level].find(key);}
+        inline NodeHandle find(Node &key, int level) const {return tables[level].find(key);}
 
-        /** Add the nodeHandle item to the front of the list of the corresponding variable.
+        /** Add the NodeHandle item to the front of the list of the corresponding variable.
          *  Used when we KNOW that the item is not in the unique table already.
          */
-        inline void add(unsigned long hash, nodeHandle item) {
+        inline void add(unsigned long hash, NodeHandle item) {
             // get node level, it may be negative if for relation
             // get var level
             // TBD
@@ -56,7 +56,7 @@ class REXBDD::UniqueTable {
         /** If the unique table of corresponding variable contains key node, remove it and return it.
          *  Otherwise, return 0.
          */
-        inline nodeHandle remove(unsigned long hash, nodeHandle item) {
+        inline NodeHandle remove(unsigned long hash, NodeHandle item) {
             // get node level, it may be negative if for relation
             // get var level
             // TBD
@@ -84,7 +84,7 @@ class REXBDD::UniqueTable {
                     return numEntries;
                 }
                 inline uint64_t getMemUsed() const {
-                    return PRIMES[sizeIndex] * sizeof(nodeHandle);
+                    return PRIMES[sizeIndex] * sizeof(NodeHandle);
                 }
 
                 // Stats for future
@@ -108,44 +108,19 @@ class REXBDD::UniqueTable {
                         unsigned hash():    return the hash value for this item.
                         bool equals(int p): return true iff this item equals node p.
                 */
-                template <typename T> nodeHandle find(const T &key) const
-                {
-                    unsigned h = key.hash() % size;
-                    MEDDLY::CHECK_RANGE(__FILE__, __LINE__, 0u, h, size);
-                    nodeHandle prev = 0;
-                    for (nodeHandle ptr = table[h];
-                            ptr != 0;
-                            ptr = parent->getNext(ptr))
-                    {
-                        if (parent->areDuplicates(ptr, key)) {
-                            // MATCH
-                            if (ptr != table[h]) {
-                                // Move to front
-                                MEDDLY_DCASSERT(prev);
-                                parent->setNext(prev, parent->getNext(ptr));
-                                parent->setNext(ptr, table[h]);
-                                table[h] = ptr;
-                            }
-                            MEDDLY_DCASSERT(table[h] == ptr);
-                            return ptr;
-                        }
-                        prev = ptr;
-                    }
-
-                    return 0;
-                }
+                template <typename T> NodeHandle find(const T &key) const;
 
                 /** Add the item to the front of the list.
                     Used when we KNOW that the item is not
                     in the unique table already.
                 */
-                void add(unsigned hash, nodeHandle item);
+                void add(unsigned hash, NodeHandle item);
 
                 /** If table contains key, remove it and return it.
                     I.e., the exact key.
                     Otherwise, return 0.
                 */
-                int remove(unsigned hash, nodeHandle item);
+                int remove(unsigned hash, NodeHandle item);
 
                 /**
                     Remove all the items in the table and reset the state.
@@ -162,14 +137,14 @@ class REXBDD::UniqueTable {
                         @return         Number of items retrieved; will be
                                         at most sz.
                 */
-                unsigned getItems(nodeHandle* items, unsigned sz) const;
+                unsigned getItems(NodeHandle* items, unsigned sz) const;
 
             private:  // helper methods
                 /// Empty the hash table into a list; returns the list.
-                nodeHandle convertToList();
+                NodeHandle convertToList();
 
                 /// A series of inserts; doesn't check for duplicates or expand.
-                void buildFromList(nodeHandle front);
+                void buildFromList(NodeHandle front);
 
                 /// Expand the hash table (if possible)
                 void expand();
@@ -179,7 +154,7 @@ class REXBDD::UniqueTable {
 
             private:
                 Forest* parent;
-                nodeHandle* table;
+                NodeHandle* table;
                 int sizeIndex;              // Table size at this level, index of PRIMES
                 uint64_t numEntries;        // The number of nodes at this level
                 unsigned nextExpandSize;    // The size for next expand
