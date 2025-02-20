@@ -1,7 +1,6 @@
 # 👑 RexBDD: Reduction-on-Edge Complement-and-Swap Binary Decision Diagram, DAC'24
 
-Next-gen BDD framework combing widely used features and ensuring canonicity.
-<!-- This library supports several types of binary decision diagrams (BDDs), including reduced ordered BDDs, zero-suppressed BDDs, and BDDs integrating multiple reduction rules, complement, and swap flags. -->
+**Next-gen** BDD framework combing widely used features and ensuring canonicity.
 
 🔗 [Paper](https://dl.acm.org/doi/10.1145/3649329.3656533)
 
@@ -28,7 +27,7 @@ We introduced RexBDDs, which canonically combine **nine** reductions (including 
    $ make clean
    ```
 
-## To-Do List
+## 🤞🏻 To-Do List
 
 - [ ] Support relational matrix nodes.
 - [ ] Support more general reduction rules with multi-terminals.
@@ -42,7 +41,7 @@ For questions on this library or collaboration inquiries, please feel free to re
 - Email (**me**): [lcdeng@iastate.edu](mailto:lcdeng@iastate.edu)
 - Email: [junaid.babar@collins.com](mailto:junaid.babar@collins.com)
 
-## Citation
+## ❤️ Citation
 
 If you find RexBDD usefull in your work, please consider citing our paper:
 
