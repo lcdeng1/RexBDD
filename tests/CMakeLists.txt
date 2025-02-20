@@ -21,6 +21,7 @@ foreach(file ${TEST_SOURCES})
   target_include_directories(${TEST_EXE} PUBLIC
     ${PROJECT_SOURCE_DIR}/src
   )
+  add_test("${TEST_EXE}" ${TEST_EXE})
 endforeach()
 
 #
@@ -32,5 +33,6 @@ cmake_policy(SET CMP0110 NEW)
 # Add the tests to run.
 # Not automated, in case tests take arguments / input files.
 #
-add_test("check test"   test_check)
+# add_test(NAME your_test_name
+#         COMMAND your_test_program your_arguments_or_inputs)
 
