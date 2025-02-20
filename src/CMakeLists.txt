@@ -1,5 +1,6 @@
 # Add source files
-file(GLOB SRC_FILES "*.cc" "*.cpp")
+file(GLOB_RECURSE SRC_FILES "*.cc" "*.cpp")
+file(GLOB_RECURSE HEADER_FILES "*.h")
 
 # Add compile options
 if (MSVC)

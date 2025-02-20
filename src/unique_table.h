@@ -25,96 +25,102 @@ class REXBDD::UniqueTable {
         ~UniqueTable();
 
         /// Get the unique table size for a given level
-        inline uint64_t getSize(int varLvl) const {return tables[varLvl].getSize();}
+        inline uint32_t getSize(int varLvl) const {return tables[varLvl-1].getSize();}
         /// Get the total size (sum over all levels)
         uint64_t getSize() const;
 
         /// Get the number of unique nodes at a given level
-        inline uint64_t getNumEntries(int varLvl) const {return tables[varLvl].getNumEntries();}
+        inline uint32_t getNumEntries(int varLvl) const {return tables[varLvl-1].getNumEntries();}
         /// Get the total number of unique nodes (sum over all levels)
         uint64_t getNumEntries() const;
 
         /// Get the memory used for a given level
-        inline uint64_t getMemUsed(int varLvl) const {return tables[varLvl].getMemUsed();}
+        inline uint64_t getMemUsed(int varLvl) const {return tables[varLvl-1].getMemUsed();}
         /// Get the total memory used (sum over all variables)
         uint64_t getMemUsed() const;
+
+        /**
+         * Add a Node to the unique table.
+         * If unique, returns a new handle; otherwise, returns the handle of the duplicate.
+         * 
+         * In either case, the returned node handle becomes the front entry of the hash chain.
+         * 
+         * @param lvl               The level of the node
+         * @param node              The given node to be inserted
+         * @return NodeHandle 
+         */
+        inline NodeHandle insert(uint16_t lvl, const Node& node) {
+            return tables[lvl-1].insert(node);
+        };
 
         /** If the table of the given variable level contains key node, return the item 
          * and move it to the front of the list. Otherwise, return 0 and do nothing.
          */
-        inline NodeHandle find(Node &key, int level) const {return tables[level].find(key);}
+        // inline NodeHandle find(uint16_t level, Node &node) const {return tables[level].find(node);}
 
         /** Add the NodeHandle item to the front of the list of the corresponding variable.
          *  Used when we KNOW that the item is not in the unique table already.
          */
-        inline void add(unsigned long hash, NodeHandle item) {
-            // get node level, it may be negative if for relation
-            // get var level
-            // TBD
-        }
+        // inline void add(unsigned long hash, NodeHandle item) {
+        //     // get node level, it may be negative if for relation
+        //     // get var level
+        //     // TBD
+        // }
 
         /** If the unique table of corresponding variable contains key node, remove it and return it.
          *  Otherwise, return 0.
          */
-        inline NodeHandle remove(unsigned long hash, NodeHandle item) {
-            // get node level, it may be negative if for relation
-            // get var level
-            // TBD
-        }
+        // inline NodeHandle remove(unsigned long hash, NodeHandle item) {
+        //     // get node level, it may be negative if for relation
+        //     // get var level
+        //     // TBD
+        //     return 0;
+        // }
 
         /// Remove all unmarked nodes from the unique table
+        inline void sweep(uint16_t level) {tables[level-1].sweep();}
         void sweep();
 
         /// Clear the nodeHanlde items in the table of the given variable level and reset the state.
-        inline void clear(int varLvl) {return tables[varLvl].clear();}
+        inline void clear(int varLvl) {return tables[varLvl-1].clear();}
 
 
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
-        class subtable {
+        class SubTable {
             public:
-                subtable();
-                ~subtable();
+                SubTable(uint16_t lvl, Forest* f);
+                ~SubTable();
 
-                inline uint64_t getSize() const {
-                    return PRIMES[sizeIndex];
+                inline uint32_t getSize() const {
+                    return PRIMES[sizeIndex]>=UINT32_MAX?UINT32_MAX:PRIMES[sizeIndex];
                 }
-                inline uint64_t getNumEntries() const {
+                inline uint32_t getNumEntries() const {
                     return numEntries;
                 }
                 inline uint64_t getMemUsed() const {
                     return PRIMES[sizeIndex] * sizeof(NodeHandle);
                 }
 
-                // Stats for future
-
-                // void reportStats(output &s, const char* pad,
-                //         reporting_flags flags) const;
+                // Stats for future TBD
 
                 // /// For debugging
                 // void show(output& s) const;
 
-                /**
-                    Initialize the sub table. Must be called before use.
-                */
-                void init(Forest *ef);
-
                 /** If table contains key, move it to the front of the list.
                     Otherwise, do nothing.
                     Returns the item if found, 0 otherwise.
-
-                    Class T must have the following methods:
-                        unsigned hash():    return the hash value for this item.
-                        bool equals(int p): return true iff this item equals node p.
                 */
-                template <typename T> NodeHandle find(const T &key) const;
-
-                /** Add the item to the front of the list.
-                    Used when we KNOW that the item is not
-                    in the unique table already.
-                */
-                void add(unsigned hash, NodeHandle item);
+                NodeHandle insert(const Node& node);
+                /**
+                 * Sweep a subtable.
+                 *  For each nodehandle in it, check if its represented node is marked or not.
+                 *  If marked, skip (mark bit(s) will be cleared in NodeManager sweep).
+                 *  If unmarked, the nodehandle will be removed.
+                 * 
+                 */
+                void sweep();
 
                 /** If table contains key, remove it and return it.
                     I.e., the exact key.
@@ -139,33 +145,25 @@ class REXBDD::UniqueTable {
                 */
                 unsigned getItems(NodeHandle* items, unsigned sz) const;
 
-            private:  // helper methods
-                /// Empty the hash table into a list; returns the list.
-                NodeHandle convertToList();
-
-                /// A series of inserts; doesn't check for duplicates or expand.
-                void buildFromList(NodeHandle front);
-
+            private:
+            // ======================Helper Methods====================
                 /// Expand the hash table (if possible)
                 void expand();
 
                 /// Shrink the hash table
                 void shrink();
-
-            private:
-                Forest* parent;
-                NodeHandle* table;
-                int sizeIndex;              // Table size at this level, index of PRIMES
-                uint64_t numEntries;        // The number of nodes at this level
-                unsigned nextExpandSize;    // The size for next expand
-                unsigned nextShrinkSize;    // The size for next shrink
-        }; // class subtable
+            // ========================================================
+                friend class UniqueTable;
+                Forest*         parent;
+                NodeHandle*     table;
+                uint16_t        level;              // The level of stored nodes
+                int             sizeIndex;          // Table size at this level, index of PRIMES
+                uint64_t        numEntries;         // The number of nodes at this level
+        }; // class SubTable
 
         // ========================================================
-        Forest*             parent;     // Parent forest
-        subtable*           tables;     // Subtables divided by levels
-        // int                 maxVar;    // The number of variables
-        // int                 minVar;    // 0 for regular BDDs, -max_var for relation BDDs
+        Forest*         parent;     // Parent forest
+        SubTable*       tables;     // Subtables divided by levels
 };
 
 

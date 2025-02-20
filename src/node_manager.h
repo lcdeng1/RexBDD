@@ -3,7 +3,6 @@
 
 #include "defines.h"
 #include "node.h"
-#include "packed_node.h"
 
 namespace REXBDD {
     class Forest;
@@ -22,7 +21,6 @@ class REXBDD::NodeManager {
     /*-------------------------------------------------------------*/
     public:
     /*-------------------------------------------------------------*/
-    NodeManager();
     NodeManager(Forest *f);
     ~NodeManager();
 
@@ -31,25 +29,18 @@ class REXBDD::NodeManager {
      *  This is either a recycled one or
      *  the next one in the available pool
      *  (which will be expanded if necessary).
+     *  Then fill it with the given unpacked node.
      */
-    inline NodeHandle getFreeNodeHandle(int varLvl) {
-        // construct with level
-        return constructHandle(varLvl, chunks[varLvl].getFreeSlot());
+    inline NodeHandle getFreeNodeHandle(const uint16_t lvl, const Node& node) {
+        return chunks[lvl-1].getFreeNodeHandle(node);
     }
 
     /**
-     *  Find the packed node (pointer) corresponding to a node handle
+     *  Find the node corresponding to a node handle
      */
-    PackedNode getNodeFromHandle(NodeHandle h);
-
-    /**
-     *  Set the given node handle with a unpacked node.
-     *  This is usually used with method getFreeNodeHandle.
-     */
-    inline void setNodeForHandle(NodeHandle h, Node p) {
-        // 
+    inline Node& getNodeFromHandle(const uint16_t lvl, const NodeHandle h) {
+        return chunks[lvl-1].getNodeFromHandle(h);
     }
-
 
     /**
      *  Recycle a used node handle.
@@ -57,7 +48,7 @@ class REXBDD::NodeManager {
      *  reused when returned by a call to
      *  getFreeNodeHandle().
      */
-    void recycleNodeHandle(NodeHandle h);
+    void recycleNodeHandle(uint16_t lvl, NodeHandle h);
 
     /**
      *  Sweep a manager.
@@ -65,55 +56,54 @@ class REXBDD::NodeManager {
      *  If marked, the mark bit(s) is cleared.
      *  If unmarked, the node is recycled.
      */
-    void sweep(int varLvl);
+    void sweep(uint16_t lvl);
     void sweep();
 
+    void unmark(uint16_t lvl);
+    void unmark();
+
+    inline uint32_t numUsed(uint16_t lvl) const { return PRIMES[chunks[lvl-1].sizeIndex] - chunks[lvl-1].numFrees; }
+    inline uint32_t numAlloc(uint16_t lvl) const { return chunks[lvl-1].firstUnalloc; }
 
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
-    class submanager {
+    class SubManager {
         public:
-            submanager(Forest *f);
-            ~submanager();
-
-            
-
-            uint64_t getFreeSlot();
+            SubManager(Forest *f);
+            ~SubManager();
 
             void sweep();
-            
         private:
-            /// Expand the hash table (if possible)
-            void expand();
+        // ======================Helper Methods====================
+            /// Get a free NodeHandle and fill it with a given node
+            NodeHandle getFreeNodeHandle(const Node& node);
+            /// Find the node corresponding to a node handle
+            Node& getNodeFromHandle(const NodeHandle h);
 
-            /// Shrink the hash table
+            /// Expand the nodes to next size (if possible)
+            void expand();
+            /// Shrink the nodes to previous size
             void shrink();
 
-        private:
-            Forest* parent;             // Parent forest
-            PackedNode* nodes;          // Actual pack node storage
-            int sizeIndex;              // Index of prime number for size
-            uint64_t firstUnalloc;      // Index of first unallocated slot
-            uint64_t freeList;          // Header of the list of unused slots
-            uint64_t numFrees;          // Number of unused slots
-    }; // class submanager
+        // ========================================================
+            friend class NodeManager;
+            Forest*     parent;         // Parent forest
+            Node*       nodes;          // Actual node storage; the 1st slot (nodes[0]) will not be used
+            int         sizeIndex;      // Index of prime number for size
+            uint32_t    firstUnalloc;   // Index of first unallocated slot
+            uint32_t    freeList;       // Header of the list of unused slots
+            uint32_t    numFrees;       // Number of free/unused slots
+            uint32_t    recycled;       // Last recycled node index
+
+    }; // class SubManager
 
     // ======================Helper Methods====================
-    inline NodeHandle constructHandle(int lvl, uint64_t index) {
-        // check range
-        #ifdef DCASSERTS_ON
-            REXBDD_DCASSERT(lvl <= ((0x01<<numLevelBits)-1) 
-                        && index <= ((0x01<<(HANDLE_LENGTH-numLevelBits))-1));
-        #endif
-        return (lvl<<(HANDLE_LENGTH-numLevelBits)) | index;
-    }
 
 
     // ========================================================
-    Forest* parent;                 // Parent Forest
-    submanager* chunks;             // Chunks by levels
-    int numLevelBits;               // number of level bits in node handle
+    Forest* parent;        // Parent Forest
+    SubManager* chunks;    // Chunks by levels
 
 };
 

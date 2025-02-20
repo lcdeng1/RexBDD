@@ -1,22 +1,20 @@
-#include "packed_node.h"
+#include "edge_flags.h"
 
+using namespace REXBDD;
 // ******************************************************************
 // *                                                                *
 // *                                                                *
-// *                     PackedNode methods                         *
+// *                          Flags methods                         *
 // *                                                                *
 // *                                                                *
 // ******************************************************************
 
-REXBDD::PackedNode::PackedNode()
+Flags::Flags(SwapSet swap, CompSet comp)
 {
-    //
+    swapType = swap;
+    compType = comp;
 }
-REXBDD::PackedNode::PackedNode(ForestSetting* s)
-{
-    //
-}
-REXBDD::PackedNode::~PackedNode()
+Flags::~Flags()
 {
     //
 }

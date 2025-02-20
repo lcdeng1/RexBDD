@@ -23,9 +23,19 @@
 #include <cstdio>
 #include <cassert>
 #include <cstring>
+#include <cstdint>
+#include <string>
 #include <cstdarg>
 #include <limits>
 #include <cmath>
+#include <vector>
+#include <list>
+#include <algorithm>  // for std::count
+#include <cctype>
+#include <iostream>
+#include <fstream>
+#include "io.h"
+// #include "gmp.h"
 
 //
 // Typedefs and constants
@@ -74,7 +84,7 @@ namespace REXBDD {
      *  "index" in node manager occupies the rest bits
      *
      */
-    typedef uint64_t NodeHandle;
+    typedef uint32_t NodeHandle;
 
 }; // namespace
 

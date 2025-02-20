@@ -1,7 +1,9 @@
 #include "defines.h"
 #include "error.h"
 
-const char* REXBDD::error::getName() const
+using namespace REXBDD;
+
+const char* error::getName() const
 {
     switch (errCode) {
         case  ErrCode::UNINITIALIZED:         return "Uninitialized";

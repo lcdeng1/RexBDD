@@ -5,7 +5,7 @@
 
 namespace REXBDD {
     /// Error codes.
-    typedef enum {
+    enum ErrCode{
         /// The library was not initialized.
         UNINITIALIZED,
         /// The library was already initialized.
@@ -52,7 +52,7 @@ namespace REXBDD {
         COULDNT_WRITE,
         /// Miscellaneous error
         MISCELLANEOUS
-    }ErrCode;
+    };
     
     class error;
 };
@@ -74,8 +74,8 @@ class REXBDD::error {
         const char* getName() const;
 
         // Override what() method to return error message
-        const char* what() const{
-            formattedMessage = "[RexBDD] ERROR!\t";
+        inline const char* what() const{
+            formattedMessage = "[REXBDD] ERROR!\t";
             formattedMessage += getName();
             formattedMessage += ": \n\tFile: \t";
             formattedMessage += fileName;
