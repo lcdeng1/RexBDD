@@ -313,7 +313,8 @@ Edge BinaryOperation::computeUNION(const uint16_t lvl, const Edge& source1, cons
         SWAP(m1, m2);
     }
     
-    // check cache here, TBD
+    // check cache here
+    if (cache.check(lvl, e1, e2, ans)) return ans;
 
     // Case that edge1 is a short edge
     if (m1 == lvl) {
@@ -329,8 +330,8 @@ Edge BinaryOperation::computeUNION(const uint16_t lvl, const Edge& source1, cons
         packRule(root, RULE_X);
         ans = resForest->reduceEdge(lvl, root, lvl, child);
 
-        // save to cache, TBD
-
+        // save to cache
+        cache.add(lvl, e1, e2, ans);
         return ans;
     }
 
@@ -357,7 +358,8 @@ Edge BinaryOperation::computeUNION(const uint16_t lvl, const Edge& source1, cons
             ans = operateHH(lvl, e1, e2);
         }
     }
-    // save cache, TBD
+    // save cache
+    cache.add(lvl, e1, e2, ans);
     return ans;
 }
 
@@ -403,8 +405,8 @@ Edge BinaryOperation::computeINTERSECTION(const uint16_t lvl, const Edge& source
         SWAP(m1, m2);
     }
     
-    // check cache here, TBD
-    // if (cache.check(lvl, e1, e2, ans)) return ans;
+    // check cache here
+    if (cache.check(lvl, e1, e2, ans)) return ans;
 
     // Case that edge1 is a short edge
     if (m1 == lvl) {
@@ -432,7 +434,7 @@ Edge BinaryOperation::computeINTERSECTION(const uint16_t lvl, const Edge& source
     ans.print(std::cout);
     std::cout << std::endl;
 #endif
-        // cache.add(lvl, e1, e2, ans);
+        cache.add(lvl, e1, e2, ans);
 #ifdef REXBDD_TRACE_OPERATION
     std::cout << "\tsave done\n";
 #endif
@@ -468,7 +470,7 @@ Edge BinaryOperation::computeINTERSECTION(const uint16_t lvl, const Edge& source
     ans.print(std::cout);
     std::cout << std::endl;
 #endif
-    // cache.add(lvl, e1, e2, ans);
+    cache.add(lvl, e1, e2, ans);
 #ifdef REXBDD_TRACE_OPERATION
     std::cout << "\tsave done\n";
 #endif

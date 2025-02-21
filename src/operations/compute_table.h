@@ -61,15 +61,6 @@ class REXBDD::CacheEntry {
         return (uint64_t)hs.finish64();
     }
 
-    // inline CacheEntry& operator=(const CacheEntry& e) {
-    //     if (equals(e)) return *this;
-    //     key = e.key;
-    //     lvl = e.lvl;
-    //     res = e.res;
-    //     keySize = e.keySize;
-    //     isInUse = e.isInUse;
-    // }
-
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
@@ -118,12 +109,18 @@ class REXBDD::ComputeTable {
     /*-------------------------------------------------------------*/
     private:
     /*-------------------------------------------------------------*/
-    CacheEntry*     table;
-    uint64_t        numEnries;
-    int             sizeIndex;
+    /**
+     * @brief This will enlarge the table and rehash the old data with the new size
+     * 
+     */
+    void enlarge(uint64_t newSize);
 
-    uint64_t        countHits;
-    uint64_t        countOverwrite;
+    std::vector<CacheEntry>     table;
+    uint64_t                    numEnries;
+    int                         sizeIndex;
+
+    uint64_t                    countHits;
+    uint64_t                    countOverwrite;
 
 };
 

@@ -15,20 +15,13 @@ ComputeTable::ComputeTable()
 {
     sizeIndex = 0;
     numEnries = 0;
-    table = (CacheEntry*)malloc(PRIMES[sizeIndex] * sizeof(CacheEntry));
-    if (!table) {
-        std::cout << "[REXBDD] ERROR!\t ComputeTable(): malloc table failed!"<< std::endl;
-        exit(0);
-    }
-    for (uint64_t i=0; i<PRIMES[sizeIndex]; i++) {
-        table[i] = CacheEntry();
-    }
+    table = std::vector<CacheEntry>(PRIMES[sizeIndex], CacheEntry());
     countHits = 0;
     countOverwrite = 0;
 }
 ComputeTable::~ComputeTable()
 {
-    free(table);
+    table.clear();
 }
 
 bool ComputeTable::check(const uint16_t lvl, const Edge& a, Edge& ans)
@@ -77,10 +70,7 @@ void ComputeTable::add(const uint16_t lvl, const Edge& a, const Edge& ans)
     if ((numEnries > (size / 1.5)) && (numEnries < (uint64_t)0x01 << 60)) {
         sizeIndex++;
         size = PRIMES[sizeIndex] ? PRIMES[sizeIndex] : ((uint64_t)0x01 << 60);
-        table = (CacheEntry*)realloc(table, size * sizeof(CacheEntry));
-        for (uint64_t i=PRIMES[sizeIndex-1]; i<size; i++) {
-            table[i] = CacheEntry();
-        }
+        enlarge(size);
     }
     CacheEntry entry(lvl, a);
     uint64_t id = entry.hash() % size;
@@ -125,19 +115,7 @@ void ComputeTable::add(const uint16_t lvl, const Edge& a, const Edge& b, const E
 #endif
         sizeIndex++;
         size = PRIMES[sizeIndex] ? PRIMES[sizeIndex] : ((uint64_t)0x01 << 60);
-        table = (CacheEntry*)realloc(table, size * sizeof(CacheEntry));
-        if (!table) {
-            std::cout << "[REXBDD] ERROR!\t ComputeTable::add(): realloc table failed!"<< std::endl;
-            exit(0);
-        }
-        // rehash the old entries, TBD
-
-// #ifdef REXBDD_CACHE_TRACE
-//     std::cout << "initialize table\n";
-// #endif
-//         for (uint64_t i=PRIMES[sizeIndex-1]; i<size; i++) {
-//             table[i] = CacheEntry();
-//         }
+        enlarge(size);
     }
     CacheEntry entry(lvl, a, b);
 #ifdef REXBDD_CACHE_TRACE
@@ -189,4 +167,19 @@ void ComputeTable::reportStat(std::ostream& out, int format) const
         out << "Hits: \t\t" << countHits << "\n";
         out << "OWs:  \t\t" << countOverwrite << "\n";
     }
+}
+
+void ComputeTable::enlarge(uint64_t newSize)
+{
+    // copy the old table
+    std::vector<CacheEntry> oldTable = table;
+    // resize the table
+    table.resize(newSize);
+    // rehash
+    for (size_t i=0; i<oldTable.size(); i++) {
+        if (oldTable[i].isInUse) {
+            table[oldTable[i].hash() % newSize] = oldTable[i];
+        }
+    }
+    oldTable.clear();
 }
